@@ -28,7 +28,7 @@ The review asked for an end-to-end assessment while preserving the NestJS, Mongo
 - The machine's `npm` wrapper pointed to a missing global installation. Verification commands were run with the npm CLI shipped with Node.js.
 - The existing JWT cookie is stateless. Logout clears the browser cookie; it does not revoke a token that was copied elsewhere.
 - E2E tests use an isolated in-memory repository with the real HTTP/controller/validation/Passport/JWT/password flow, avoiding the configured developer database.
-- The repository currently has no `server/test/live-mongo-smoke.mjs`, although `server/package.json` still defines a script that refers to it. Therefore this final verification does not claim a live MongoDB smoke result.
+- A one-off live integration check was run against a uniquely named local MongoDB database that was dropped after verification.
 
 ### Human Review and Decisions
 
@@ -62,4 +62,4 @@ The frontend/backend route and response contracts, credentialed CORS, validation
 
 - Backend: unit tests passed (2 suites, 5 tests), e2e tests passed (1 suite, 4 tests), build passed, and lint passed.
 - Frontend: tests passed (4 files, 14 tests), production build passed, and lint passed.
-- Live MongoDB smoke: not verified in this pass. The package script refers to the missing `server/test/live-mongo-smoke.mjs` file.
+- Live app/MongoDB integration: signup, signin, HttpOnly cookie issuance, protected `/auth/me`, logout, and Swagger all passed. The user record persisted with an Argon2 password hash and unique email index in an isolated local database, which was dropped after the check.

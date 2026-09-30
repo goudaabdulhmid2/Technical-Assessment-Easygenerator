@@ -173,7 +173,7 @@ npm run build
 npm run lint
 ```
 
-The e2e suite exercises the HTTP authentication flow with an isolated in-memory repository; it does not verify a live MongoDB connection. `server/package.json` also defines `test:mongo:smoke`, but its target file `server/test/live-mongo-smoke.mjs` is absent in this checkout, so that script is currently unavailable and no live MongoDB smoke result is claimed.
+The e2e suite exercises the HTTP authentication flow with an isolated in-memory repository. A final integration check against an isolated local MongoDB database also passed signup, signin, cookie-authenticated `/auth/me`, logout, Swagger, persisted Argon2 hashing, and the unique email index; the temporary database was dropped afterward. See [AI.md](./AI.md#final-verification).
 
 ### Frontend
 
