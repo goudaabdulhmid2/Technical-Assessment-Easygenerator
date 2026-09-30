@@ -1,10 +1,18 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { ConfigModule } from '@nestjs/config';
+
+import { DatabaseModule } from './common/database/database.module';
+import { envValidationSchema } from './config/env.validation';
 
 @Module({
-  imports: [],
-  controllers: [AppController],
-  providers: [AppService],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      cache: true,
+      validationSchema: envValidationSchema,
+    }),
+
+    DatabaseModule,
+  ],
 })
 export class AppModule {}
