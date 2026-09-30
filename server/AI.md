@@ -29,3 +29,9 @@ The review prompt asked for an end-to-end backend assessment while preserving th
 ## Human review and decisions
 
 The existing architecture, auth flow, cookie settings, and short-lived access token were retained. The test strategy avoids introducing MongoDB or Redis infrastructure. Swagger uses cookie authentication metadata and does not advertise bearer tokens. Build, lint, unit test, and e2e results are recorded from commands actually run for this review; any unavailable result is identified explicitly in the delivery report.
+
+## Frontend continuation
+
+The frontend implementation is in the sibling `client/` folder. AI assistance was used to scaffold the React/TypeScript auth context, route guards, forms, validation helpers, API client, responsive CSS, and focused tests. Before coding, the implementation was checked against the assessment PDF and the actual backend routes, response envelopes, CORS origin, and HttpOnly cookie behavior.
+
+The client uses `credentials: 'include'`, never reads or persists the access token, waits for `/auth/me` before resolving protected routes, and clears in-memory auth state even when logout cannot reach the server. The UI duplicates validation only for immediate feedback; the Nest DTOs remain authoritative. The visual implementation uses CSS and inline shapes without introducing a UI framework.
