@@ -1,26 +1,65 @@
 # AI Assistance Disclosure
 
-AI assistance was used to review the backend requirements, scaffold parts of the frontend, and refine validation, error handling, documentation, and tests. The implementation was checked against the provided assessment and the actual NestJS API contracts.
+## Overview
 
-## Frontend assistance
+AI assistance was used during the backend review and implementation work and the frontend implementation. The resulting changes were checked against the assessment and the repository, then reviewed and adapted; this disclosure does not claim that AI authored the entire project.
 
-The frontend brief was used to guide a React/TypeScript implementation with `/signup`, `/signin`, and protected `/app` routes. The effective approach was to inspect the backend DTOs, controller response shapes, CORS origin, and cookie settings before writing the client API layer. AI-assisted work includes the auth context, route guards, form validation, accessible feedback states, responsive styling, and focused tests.
+## Backend Assistance
 
-The API client always sends credentials and reads the backend’s `{ user }` response. It never reads or stores the HttpOnly token. Signup success routes to signin; protected navigation waits for `/auth/me`; logout clears local auth state even when the server cannot confirm cookie removal.
+### Scope of AI Assistance
 
-## Prompts and review approach
+AI assistance supported the backend review, targeted changes, tests, and backend documentation. This included Swagger setup, DTO validation coverage, duplicate-key conflict handling, auth service tests, and isolated HTTP end-to-end coverage. The original history of the pre-existing application code was not available during the review.
 
-The implementation prompt asked for a scoped, production-conscious frontend that follows the assessment exactly, integrates with the existing backend rather than assuming an API, and avoids token storage or unnecessary auth infrastructure. Work proceeded by inspecting routes and DTOs, implementing the smallest matching client contract, then building and testing the UI.
+### Effective Prompts and Approach
 
-## Corrections and decisions
+The review asked for an end-to-end assessment while preserving the NestJS, Mongoose, `BaseRepository`, Argon2, and cookie-based JWT architecture. The implementation and package scripts were inspected first; changes were kept focused on identified gaps and then checked with project commands.
 
-- The project uses React Router’s declarative browser router and a small context rather than adding Redux or a larger state library.
-- A transient failure during the initial session check is shown as a recoverable error on the protected route; only an actual unauthorized response marks the session unauthenticated.
-- Validation is mirrored in the UI for feedback while the backend remains authoritative.
-- The logout UI clears in-memory auth state if the network fails and tells the user that the server could not confirm cookie removal.
-- The design uses CSS and inline UI details rather than adding a component framework or image assets.
-- Frontend build, lint, unit tests, and the live backend/Mongo auth smoke flow are run before delivery; outcomes are reported from the actual commands.
+### Suggestions Accepted
 
-## Backend assistance
+- Register the existing global exception filter and document the cookie authentication flow.
+- Normalize whitespace around names and emails, reject whitespace-only names, and return HTTP 409 for duplicate-email signup races.
+- Keep query strings out of request access logs.
+- Exercise the HTTP authentication lifecycle in e2e tests with an isolated repository rather than a developer database.
+- Replace the Nest starter documentation with setup and API guidance for this backend.
 
-The backend review and its AI-assisted changes are documented in [server/AI.md](server/AI.md). The existing architecture was preserved, and the frontend was adapted to its cookie-based auth routes and response contracts.
+### Corrections and Rework
+
+- An initial Swagger dependency resolution selected a release requiring Nest 12. It was changed to the Nest 11-compatible major used by this project.
+- The machine's `npm` wrapper pointed to a missing global installation. Verification commands were run with the npm CLI shipped with Node.js.
+- The existing JWT cookie is stateless. Logout clears the browser cookie; it does not revoke a token that was copied elsewhere.
+- E2E tests use an isolated in-memory repository with the real HTTP/controller/validation/Passport/JWT/password flow, avoiding the configured developer database.
+- The repository currently has no `server/test/live-mongo-smoke.mjs`, although `server/package.json` still defines a script that refers to it. Therefore this final verification does not claim a live MongoDB smoke result.
+
+### Human Review and Decisions
+
+The existing backend architecture, authentication flow, cookie settings, and short-lived access token were retained. The test approach avoids adding MongoDB or Redis infrastructure to the e2e suite. Swagger describes cookie authentication and does not advertise bearer-token auth. Dependency compatibility and the limits of stateless logout were reviewed and kept explicit in the documentation.
+
+## Frontend Assistance
+
+### Scope of AI Assistance
+
+AI assistance was used to implement the React/TypeScript client, including its authentication context, route guards, signup/signin forms, API client, validation helpers, accessible feedback states, responsive CSS, and focused tests.
+
+### Effective Prompts and Approach
+
+The frontend was implemented against the actual backend DTOs, routes, response envelopes, CORS configuration, and cookie behavior. The assessment PDF and frontend brief informed the user flows, while the backend remained the source of truth for API behavior and validation.
+
+### Corrections and Decisions
+
+- Use React Router declarative routing and a small auth context instead of adding Redux.
+- Check `/auth/me` at initial load before resolving protected navigation.
+- Treat an unauthorized session check as signed out, while presenting transient API failures as recoverable errors.
+- Mirror backend signup validation in the UI for immediate feedback; backend validation remains authoritative.
+- Clear in-memory auth state on logout even if the server cannot be reached, and tell the user that cookie removal could not be confirmed.
+- Use CSS for the interface instead of adding an unnecessary UI framework.
+- Send credentials with API requests and let the browser handle the HttpOnly cookie; never read or store the token in browser storage.
+
+### Human Review and Verification
+
+The frontend/backend route and response contracts, credentialed CORS, validation rules, cookie handling, token-storage behavior, and security-relevant decisions were checked against the code. Frontend tests exercise validation, route guards, auth flows, and credentialed API requests. Verification results below reflect commands run for this documentation update.
+
+## Final Verification
+
+- Backend: unit tests passed (2 suites, 5 tests), e2e tests passed (1 suite, 4 tests), build passed, and lint passed.
+- Frontend: tests passed (4 files, 14 tests), production build passed, and lint passed.
+- Live MongoDB smoke: not verified in this pass. The package script refers to the missing `server/test/live-mongo-smoke.mjs` file.
