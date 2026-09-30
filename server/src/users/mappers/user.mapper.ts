@@ -4,7 +4,6 @@ export interface UserResponse {
   id: string;
   name: string;
   email: string;
-  createdAt: Date;
 }
 
 export class UserMapper {
@@ -13,7 +12,6 @@ export class UserMapper {
       id: user._id.toString(),
       name: user.name,
       email: user.email,
-      createdAt: user.createdAt,
     };
   }
 }

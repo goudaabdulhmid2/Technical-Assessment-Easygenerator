@@ -19,4 +19,7 @@ export const envValidationSchema = Joi.object({
 
   JWT_ACCESS_EXPIRES_IN: Joi.string()
     .required(),
+  FRONTEND_URL: Joi.string()
+  .uri()
+  .required(),
 });
