@@ -4,11 +4,11 @@ import { JwtModule } from '@nestjs/jwt';
 import type { StringValue } from 'ms';
 
 
-import { PasswordModule } from '../common/security/password/password.module';
-import { UsersModule } from '../users/users.module';
-import { AuthController } from './controllers/auth.controller';
-import { AuthService } from './services/auth.service';
-import { JwtStrategy } from './strategies/jwt.strategy';
+import { PasswordModule } from '../common/security/password/password.module.js';
+import { UsersModule } from '../users/users.module.js';
+import { AuthController } from './controllers/auth.controller.js';
+import { AuthService } from './services/auth.service.js';
+import { JwtStrategy } from './strategies/jwt.strategy.js';
 
 @Module({
   imports: [

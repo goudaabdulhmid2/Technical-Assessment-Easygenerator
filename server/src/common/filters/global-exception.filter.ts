@@ -69,7 +69,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
                 typeof exceptionResponse === 'object' &&
                 exceptionResponse !== null
               ) {
-                const body = exceptionResponse as {
+        const body = exceptionResponse as {
                   message?: string;
                   errors?: unknown[];
                 };
@@ -123,9 +123,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     ) {
       statusCode = HttpStatus.BAD_REQUEST;
 
-      message = `Invalid ${exception.path}: ${String(
-        exception.value,
-      )}`;
+      message = `Invalid value for ${exception.path}`;
     }
 
     // ==============================
@@ -133,7 +131,14 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     // ==============================
 
     else {
-      this.logger.error(exception);
+      const error = exception instanceof Error ? exception : new Error('Unknown exception');
+      this.logger.error(error.message, error.stack);
+    }
+
+    if (statusCode < HttpStatus.INTERNAL_SERVER_ERROR) {
+      this.logger.warn(`${request.method} ${request.path} ${statusCode}`);
+    } else if (exception instanceof HttpException) {
+      this.logger.error(`${request.method} ${request.path} ${statusCode}`);
     }
 
     response.status(statusCode).json({
@@ -142,7 +147,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       message,
       errors,
       timestamp: new Date().toISOString(),
-      path: request.url,
+      path: request.path,
     });
   }
 

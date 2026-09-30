@@ -22,7 +22,7 @@ export class HttpLoggingMiddleware implements NestMiddleware {
       const duration = Date.now() - startTime;
 
       this.logger.log(
-        `${request.method} ${request.originalUrl} ${response.statusCode} - ${duration}ms`,
+        `${request.method} ${request.path} ${response.statusCode} - ${duration}ms`,
       );
     });
 

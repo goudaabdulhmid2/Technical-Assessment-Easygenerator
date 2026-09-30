@@ -3,21 +3,33 @@ import {
   Body,
   Controller,
   Get,
+  HttpCode,
   Post,
   Req,
   Res,
   UseGuards,
 } from '@nestjs/common';
+import {
+  ApiBadRequestResponse,
+  ApiCookieAuth,
+  ApiConflictResponse,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import type { Request, Response } from 'express';
 
-import { UserMapper } from '../../users/mappers/user.mapper';
-import { SignupDto } from '../dto/signup.dto';
-import { SigninDto } from '../dto/signin.dto';
-import { JwtAuthGuard } from '../guards/jwt-auth.guard';
-import { AuthService } from '../services/auth.service';
+import { UserMapper } from '../../users/mappers/user.mapper.js';
+import { SignupDto } from '../dto/signup.dto.js';
+import { SigninDto } from '../dto/signin.dto.js';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard.js';
+import { AuthService } from '../services/auth.service.js';
 
 @Controller('auth')
+@ApiTags('Authentication')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
@@ -30,6 +42,10 @@ export class AuthController {
     },
   })
   @Post('signup')
+  @ApiOperation({ summary: 'Create an account' })
+  @ApiCreatedResponse({ description: 'Account created; password is never returned.' })
+  @ApiBadRequestResponse({ description: 'Invalid signup data or unknown fields.' })
+  @ApiConflictResponse({ description: 'Email is already registered.' })
   async signup(@Body() dto: SignupDto) {
     const user = await this.authService.signup(dto);
 
@@ -46,6 +62,11 @@ export class AuthController {
   },
     })
   @Post('signin')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Sign in and set the access-token cookie' })
+  @ApiOkResponse({ description: 'Signed in. Sets an HttpOnly access_token cookie.' })
+  @ApiBadRequestResponse({ description: 'Invalid request data.' })
+  @ApiUnauthorizedResponse({ description: 'Invalid credentials.' })
   async signin(
     @Body() dto: SigninDto,
     @Res({ passthrough: true }) response: Response,
@@ -67,6 +88,10 @@ export class AuthController {
 
   @Get('me')
   @UseGuards(JwtAuthGuard)
+  @ApiCookieAuth('access_token')
+  @ApiOperation({ summary: 'Get the authenticated user' })
+  @ApiOkResponse({ description: 'Current user profile.' })
+  @ApiUnauthorizedResponse({ description: 'Missing or invalid access-token cookie.' })
   async me(@Req() request: Request) {
     const authUser = request.user as {
         userId: string;
@@ -82,6 +107,9 @@ export class AuthController {
   }
 
   @Post('logout')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Clear the access-token cookie' })
+  @ApiOkResponse({ description: 'Clears the access_token cookie in this client.' })
   async logout(
     @Res({ passthrough: true }) response: Response,
   ) {

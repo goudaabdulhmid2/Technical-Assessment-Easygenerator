@@ -1,4 +1,4 @@
-import { UserDocument } from '../schemas/user.schema';
+import type { UserDocument } from '../schemas/user.schema.js';
 
 export interface UserResponse {
   id: string;

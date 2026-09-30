@@ -8,13 +8,14 @@ import {
   ThrottlerGuard,
   ThrottlerModule,
 } from '@nestjs/throttler';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 
-import { AuthModule } from './auth/auth.module';
-import { DatabaseModule } from './common/database/database.module';
-import { envValidationSchema } from './config/env.validation';
-import { UsersModule } from './users/users.module';
-import { HttpLoggingMiddleware } from './common/logging/http-logging.middleware';
+import { AuthModule } from './auth/auth.module.js';
+import { DatabaseModule } from './common/database/database.module.js';
+import { envValidationSchema } from './config/env.validation.js';
+import { UsersModule } from './users/users.module.js';
+import { HttpLoggingMiddleware } from './common/logging/http-logging.middleware.js';
+import { GlobalExceptionFilter } from './common/filters/global-exception.filter.js';
 
 @Module({
   imports: [
@@ -38,9 +39,10 @@ import { HttpLoggingMiddleware } from './common/logging/http-logging.middleware'
   ],
 
   providers: [
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
     {
-      provide: APP_GUARD,
-      useClass: ThrottlerGuard,
+      provide: APP_FILTER,
+      useClass: GlobalExceptionFilter,
     },
   ],
 })

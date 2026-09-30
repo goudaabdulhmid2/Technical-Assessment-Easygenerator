@@ -6,10 +6,11 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
-import { PasswordService } from '../../common/security/password/password.service';
-import { UsersRepository } from '../../users/repositories/users.repository';
-import { SignupDto } from '../dto/signup.dto';
-import { SigninDto } from '../dto/signin.dto';
+import { PasswordService } from '../../common/security/password/password.service.js';
+import { UsersRepository } from '../../users/repositories/users.repository.js';
+import type { UserDocument } from '../../users/schemas/user.schema.js';
+import { SignupDto } from '../dto/signup.dto.js';
+import { SigninDto } from '../dto/signin.dto.js';
 
 @Injectable()
 export class AuthService {
@@ -34,11 +35,19 @@ export class AuthService {
     const hashedPassword =
       await this.passwordService.hash(dto.password);
 
-    const user = await this.usersRepository.create({
-      name: dto.name.trim(),
-      email: normalizedEmail,
-      password: hashedPassword,
-    });
+    let user: UserDocument;
+    try {
+      user = await this.usersRepository.create({
+        name: dto.name.trim(),
+        email: normalizedEmail,
+        password: hashedPassword,
+      });
+    } catch (error) {
+      if (this.isDuplicateKeyError(error)) {
+        throw new ConflictException('Email is already registered');
+      }
+      throw error;
+    }
 
     return user;
   }
@@ -89,5 +98,14 @@ export class AuthService {
     }
 
     return user;
+  }
+
+  private isDuplicateKeyError(error: unknown): boolean {
+    return (
+      typeof error === 'object' &&
+      error !== null &&
+      'code' in error &&
+      error.code === 11000
+    );
   }
 }
